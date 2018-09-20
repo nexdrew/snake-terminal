@@ -75,79 +75,91 @@ function move (gridSize, snake, direction) {
   snake[0].c = col
 }
 
-sywac
-  .number('-g, --grid <size>', { defaultValue: 16 })
-  .enumeration('-s, --speed <speed>', {
-    choices: ['slow', 'normal', 'fast', 'insane'],
-    defaultValue: 'normal'
-  })
-  .string('-b, --body <char>', {
-    defaultValue: '▉',
-    coerce: v => (v && v[0]) || '▉'
-  })
-  .help('-h, --help')
-  .parseAndExit()
-  .then(argv => {
-    const gridSize = argv.grid
-
-    console.log(`Grid ${gridSize}x${gridSize}, Speed: ${argv.speed}`)
-    let millis = 110
-    switch (argv.speed) {
-      case 'slow':
-        millis = 160
-        break
-      case 'fast':
-        millis = 60
-        break
-      case 'insane':
-        millis = 30
-        break
-    }
-
-    const opts = {
-      body: argv.body
-    }
-    const snake = []
-
-    let direction = RIGHT
-    // let keypressAllowed = true
-
-    keypress(process.stdin)
-    process.stdin.on('keypress', function (ch, key) {
-      if (key && key.ctrl && key.name == 'c') lose('You gave up!')
-
-      // if (!keypressAllowed) return
-      // let dirBefore = direction
-
-      if (key && key.name === 'up' && direction !== DOWN) direction = UP
-      else if (key && key.name === 'down' && direction !== UP) direction = DOWN
-      else if (key && key.name === 'right' && direction !== LEFT) direction = RIGHT
-      else if (key && key.name === 'left' && direction !== RIGHT) direction = LEFT
-
-      // if (dirBefore !== direction) keypressAllowed = false
+function play () {
+  sywac
+    .number('-g, --grid <size>', { defaultValue: 16 })
+    .enumeration('-s, --speed <speed>', {
+      choices: ['slow', 'normal', 'fast', 'insane'],
+      defaultValue: 'normal'
     })
-    process.stdin.setRawMode(true)
-    process.stdin.resume()
+    .string('-b, --body <char>', {
+      defaultValue: '▉',
+      coerce: v => (v && v[0]) || '▉'
+    })
+    .help('-h, --help')
+    .parseAndExit()
+    .then(argv => {
+      const gridSize = argv.grid
 
-    snake.push({ r: 0, c: 0 })
-    logUpdate(renderGrid(gridSize, snake, direction, opts))
-    setInterval(() => {
-      move(gridSize, snake, direction)
-      // keypressAllowed = true
+      console.log(`Grid ${gridSize}x${gridSize}, Speed: ${argv.speed}`)
+      let millis = 110
+      switch (argv.speed) {
+        case 'slow':
+          millis = 160
+          break
+        case 'fast':
+          millis = 60
+          break
+        case 'insane':
+          millis = 30
+          break
+      }
+
+      const opts = {
+        body: argv.body
+      }
+      const snake = []
+
+      let direction = RIGHT
+      // let keypressAllowed = true
+
+      keypress(process.stdin)
+      process.stdin.on('keypress', function (ch, key) {
+        if (key && key.ctrl && key.name == 'c') lose('You gave up!')
+
+        // if (!keypressAllowed) return
+        // let dirBefore = direction
+
+        if (key && key.name === 'up' && direction !== DOWN) direction = UP
+        else if (key && key.name === 'down' && direction !== UP) direction = DOWN
+        else if (key && key.name === 'right' && direction !== LEFT) direction = RIGHT
+        else if (key && key.name === 'left' && direction !== RIGHT) direction = LEFT
+
+        // if (dirBefore !== direction) keypressAllowed = false
+      })
+      process.stdin.setRawMode(true)
+      process.stdin.resume()
+
+      snake.push({ r: 0, c: 0 })
       logUpdate(renderGrid(gridSize, snake, direction, opts))
-    }, millis)
-    
-    // setInterval(() => {
-    //   keypressAllowed = true
-    // }, millis / 2)
+      setInterval(() => {
+        move(gridSize, snake, direction)
+        // keypressAllowed = true
+        logUpdate(renderGrid(gridSize, snake, direction, opts))
+      }, millis)
 
-    setInterval(() => {
-      let r = snake[snake.length-1].r
-      let c = snake[snake.length-1].c
-      if (direction === UP) r++
-      else if (direction === DOWN) r--
-      else if (direction === RIGHT) c--
-      else c++
-      snake.push({ r, c })
-    }, 1000)
-  })
+      // setInterval(() => {
+      //   keypressAllowed = true
+      // }, millis / 2)
+
+      setInterval(() => {
+        let r = snake[snake.length-1].r
+        let c = snake[snake.length-1].c
+        if (direction === UP) r++
+        else if (direction === DOWN) r--
+        else if (direction === RIGHT) c--
+        else c++
+        snake.push({ r, c })
+      }, 1000)
+    })
+}
+
+module.exports = {
+  lose,
+  move,
+  play,
+  renderGrid,
+  renderRow
+}
+
+if (require.main === module) module.exports.play()
