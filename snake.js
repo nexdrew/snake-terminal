@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const keypress = require('keypress')
 const logUpdate = require('log-update')
 const sywac = require('sywac')
